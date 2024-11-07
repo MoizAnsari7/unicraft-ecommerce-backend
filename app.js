@@ -5,16 +5,18 @@ const app = express();
 let port = 3000;
 
 //basic test api
-app.get("/", ( req, res )=> {
+// app.get("/", ( req, res )=> {
     
-    console.log("inside test controller");
+//     console.log("inside test controller");
 
-    return res.status(200).json({
-        status : 200,
-        msg : "API is working"
-    });
-})
+//     return res.status(200).json({
+//         status : 200,
+//         msg : "API is working"
+//     });
+// })
 
+//routes configuration
+app.use("/v1", require("./routes"))
 
 app.listen(3000, (err)=>{
     if( err )
