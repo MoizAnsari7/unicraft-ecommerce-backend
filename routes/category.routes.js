@@ -50,4 +50,28 @@ router.get('/:categoryId', async (req, res) => {
     }
   });
 
+
+  // PUT /api/categories/:categoryId - Update a category's information (admin only)
+router.put('/:categoryId', authMiddleware, async (req, res) => {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ message: 'Access Denied' });
+    }
+  
+    const { name, description, parentCategoryId } = req.body;
+    try {
+      const updatedCategory = await Categories.findByIdAndUpdate(
+        req.params.categoryId,
+        { name, description, parentCategoryId: parentCategoryId || null },
+        { new: true }
+      );
+      if (!updatedCategory) {
+        return res.status(404).json({ message: 'Category not found' });
+      }
+      res.status(200).json(updatedCategory);
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating category', error });
+    }
+  });
+  
+
   module.exports = router;
