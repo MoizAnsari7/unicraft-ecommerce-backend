@@ -63,3 +63,14 @@ router.put('/profile', authMiddleware, async (req, res) => {
     }
   });
   
+
+  // GET /api/users/orders - Get order history for a user (authentication required)
+router.get('/orders', authMiddleware, async (req, res) => {
+    try {
+      const user = await User.findById(req.user._id).populate('orderHistory');
+      if (!user) return res.status(404).json({ message: 'User not found' });
+      res.status(200).json(user.orderHistory);
+    } catch (error) {
+      res.status(500).json({ message: 'Error retrieving order history', error });
+    }
+  });
