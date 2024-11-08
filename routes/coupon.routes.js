@@ -33,3 +33,24 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error creating coupon', error });
     }
   });
+
+
+  // PUT /api/coupons/:couponId - Update an existing coupon (admin only)
+router.put('/:couponId', authMiddleware, adminMiddleware, async (req, res) => {
+    const { code, discountPercentage, maxDiscountAmount, expiryDate, isActive } = req.body;
+    try {
+      const coupon = await Coupon.findById(req.params.couponId);
+      if (!coupon) return res.status(404).json({ message: 'Coupon not found' });
+  
+      coupon.code = code ?? coupon.code;
+      coupon.discountPercentage = discountPercentage ?? coupon.discountPercentage;
+      coupon.maxDiscountAmount = maxDiscountAmount ?? coupon.maxDiscountAmount;
+      coupon.expiryDate = expiryDate ?? coupon.expiryDate;
+      coupon.isActive = isActive ?? coupon.isActive;
+  
+      await coupon.save();
+      res.status(200).json(coupon);
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating coupon', error });
+    }
+  });
