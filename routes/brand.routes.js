@@ -60,3 +60,22 @@ router.put('/:brandId', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error updating brand', error });
     }
   });
+
+
+  // DELETE /api/brands/:brandId - Remove a brand (admin only)
+router.delete('/:brandId', authMiddleware, async (req, res) => {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ message: 'Access Denied' });
+    }
+  
+    try {
+      const deletedBrand = await Brands.findByIdAndDelete(req.params.brandId);
+      if (!deletedBrand) {
+        return res.status(404).json({ message: 'Brand not found' });
+      }
+  
+      res.status(200).json({ message: 'Brand deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deleting brand', error });
+    }
+  });
