@@ -112,7 +112,29 @@ router.delete('/', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error clearing cart', error });
     }
   });
+   
 
+
+  // POST /api/cart/save - Save specific items for later
+router.post('/save', authMiddleware, async (req, res) => {
+    const { productId, saveForLater } = req.body;
+    try {
+      const cart = await Cart.findOne({ userId: req.user._id });
+      if (!cart) return res.status(404).json({ message: 'Cart not found' });
+  
+      const item = cart.items.find(item => item.productId.equals(productId));
+      if (item) {
+        item.savedForLater = saveForLater;
+        await cart.save();
+        res.status(200).json(cart);
+      } else {
+        res.status(404).json({ message: 'Product not found in cart' });
+      }
+    } catch (error) {
+      res.status(500).json({ message: 'Error saving item for later', error });
+    }
+  });
+  
 
 
 
