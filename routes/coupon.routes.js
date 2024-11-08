@@ -54,3 +54,18 @@ router.put('/:couponId', authMiddleware, adminMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error updating coupon', error });
     }
   });
+
+
+
+
+// DELETE /api/coupons/:couponId - Delete a coupon (admin only)
+router.delete('/:couponId', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+      const coupon = await Coupon.findByIdAndDelete(req.params.couponId);
+      if (!coupon) return res.status(404).json({ message: 'Coupon not found' });
+  
+      res.status(200).json({ message: 'Coupon deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deleting coupon', error });
+    }
+  });
