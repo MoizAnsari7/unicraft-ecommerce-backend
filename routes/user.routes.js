@@ -75,7 +75,7 @@ router.get('/orders', authMiddleware, async (req, res) => {
     }
   });
 
-  
+
   // POST /api/users/address - Add new address
 router.post('/address', authMiddleware, async (req, res) => {
     const { street, city, state, country, postalCode } = req.body;
@@ -89,5 +89,29 @@ router.post('/address', authMiddleware, async (req, res) => {
       res.status(201).json({ message: 'Address added successfully', addresses: user.addresses });
     } catch (error) {
       res.status(500).json({ message: 'Error adding address', error });
+    }
+  });
+
+
+  // PUT /api/users/address/:addressId - Update an address
+router.put('/address/:addressId', authMiddleware, async (req, res) => {
+    const { street, city, state, country, postalCode } = req.body;
+    try {
+      const user = await User.findById(req.user._id);
+      if (!user) return res.status(404).json({ message: 'User not found' });
+  
+      const address = user.addresses.id(req.params.addressId);
+      if (!address) return res.status(404).json({ message: 'Address not found' });
+  
+      address.street = street ?? address.street;
+      address.city = city ?? address.city;
+      address.state = state ?? address.state;
+      address.country = country ?? address.country;
+      address.postalCode = postalCode ?? address.postalCode;
+  
+      await user.save();
+      res.status(200).json({ message: 'Address updated successfully', address });
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating address', error });
     }
   });
