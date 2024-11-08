@@ -19,3 +19,15 @@ router.post('/register', async (req, res) => {
     res.status(500).json({ message: 'Error registering user', error });
   }
 });
+
+
+// POST /api/users/login - Log in an existing user
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      // Code to authenticate user and return token
+      res.status(200).json({ message: 'Login successful', token: /* JWT token here */ });
+    } catch (error) {
+      res.status(500).json({ message: 'Error logging in', error });
+    }
+  });
