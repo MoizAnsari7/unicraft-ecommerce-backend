@@ -3,15 +3,16 @@ const User = require('../model/User');
 const authMiddleware = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-// POST /api/users/register - Register a new user
+const bcrypt = require('bcrypt');
+
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
   try {
-    // Code to create new user after hashing password, etc.
+    const hashedPassword = await bcrypt.hash(password, 10); // Hash password
     const user = new User({
       username,
       email,
-      passwordHash: /* hashed password here */
+      passwordHash: hashedPassword
     });
     await user.save();
     res.status(201).json({ message: 'User registered successfully', user });
@@ -19,7 +20,6 @@ router.post('/register', async (req, res) => {
     res.status(500).json({ message: 'Error registering user', error });
   }
 });
-
 
 // POST /api/users/login - Log in an existing user
 router.post('/login', async (req, res) => {
