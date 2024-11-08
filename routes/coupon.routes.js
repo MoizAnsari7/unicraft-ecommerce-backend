@@ -69,3 +69,21 @@ router.delete('/:couponId', authMiddleware, adminMiddleware, async (req, res) =>
       res.status(500).json({ message: 'Error deleting coupon', error });
     }
   });
+
+
+
+// PUT /api/coupons/:couponId/deactivate - Deactivate a coupon (admin only)
+router.put('/:couponId/deactivate', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+      const coupon = await Coupon.findById(req.params.couponId);
+      if (!coupon) return res.status(404).json({ message: 'Coupon not found' });
+  
+      coupon.isActive = false;
+      await coupon.save();
+      res.status(200).json({ message: 'Coupon deactivated successfully', coupon });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deactivating coupon', error });
+    }
+  });
+  
+  module.exports = router;
