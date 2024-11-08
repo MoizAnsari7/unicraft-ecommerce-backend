@@ -107,11 +107,11 @@ router.put('/address/:addressId', authMiddleware, async (req, res) => {
       address.city = city ?? address.city;
       address.state = state ?? address.state;
       address.country = country ?? address.country;
-      address.postalCode = postalCode ?? address.postalCode;
+      address.postalCode = postalCode ?? address.postalCode;  
   
       await user.save();
       res.status(200).json({ message: 'Address updated successfully', address });
     } catch (error) {
       res.status(500).json({ message: 'Error updating address', error });
-    }
+    } 
   });
