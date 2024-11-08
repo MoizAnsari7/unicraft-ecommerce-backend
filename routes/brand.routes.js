@@ -79,3 +79,6 @@ router.delete('/:brandId', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error deleting brand', error });
     }
   });
+
+
+  module.exports = router;

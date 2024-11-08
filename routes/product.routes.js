@@ -98,4 +98,17 @@ router.put('/:productId', authMiddleware, async (req, res) => {
     }
   });
   
+  // DELETE /api/products/:productId - Delete product (admin only)
+router.delete('/:productId', authMiddleware, async (req, res) => {
+    if (req.userRole !== 'admin') return res.status(403).json({ message: 'Access Denied' });
   
+    try {
+      const deletedProduct = await Product.findByIdAndDelete(req.params.productId);
+      if (!deletedProduct) return res.status(404).json({ message: 'Product not found' });
+      res.status(200).json({ message: 'Product deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deleting product', error });
+    }
+  });
+  
+  module.exports = router;
