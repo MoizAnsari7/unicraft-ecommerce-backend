@@ -97,6 +97,23 @@ router.delete('/:productId', authMiddleware, async (req, res) => {
 });
 
 
+// DELETE /api/cart - Clear the entire cart
+router.delete('/', authMiddleware, async (req, res) => {
+    try {
+      const cart = await Cart.findOneAndUpdate(
+        { userId: req.user._id },
+        { items: [], total: 0 },
+        { new: true }
+      );
+      if (!cart) return res.status(404).json({ message: 'Cart not found' });
+  
+      res.status(200).json(cart);
+    } catch (error) {
+      res.status(500).json({ message: 'Error clearing cart', error });
+    }
+  });
+
+
 
 
 
