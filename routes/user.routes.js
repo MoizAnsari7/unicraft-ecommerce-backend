@@ -1,15 +1,21 @@
 const express = require('express');
-const Coupon = require('../models/Coupon');
-const authMiddleware = require('../middleware/auth');
-const adminMiddleware = require('../middleware/admin'); // Middleware for admin authorization
+const User = require('../model/User');
+const authMiddleware = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-// GET /api/coupons - Retrieve all active coupons
-router.get('/', authMiddleware, async (req, res) => {
+// POST /api/users/register - Register a new user
+router.post('/register', async (req, res) => {
+  const { username, email, password } = req.body;
   try {
-    const coupons = await Coupon.find({ isActive: true, expiryDate: { $gte: new Date() } });
-    res.status(200).json(coupons);
+    // Code to create new user after hashing password, etc.
+    const user = new User({
+      username,
+      email,
+      passwordHash: /* hashed password here */
+    });
+    await user.save();
+    res.status(201).json({ message: 'User registered successfully', user });
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving coupons', error });
+    res.status(500).json({ message: 'Error registering user', error });
   }
 });
