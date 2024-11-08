@@ -2,9 +2,11 @@ const express = require('express');
 const User = require('../model/User');
 const authMiddleware = require('../middlewares/authMiddleware');
 const router = express.Router();
-
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
+ 
+// POST /api/users/register - Register a new user
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
   try {
@@ -23,14 +25,18 @@ router.post('/register', async (req, res) => {
 
 // POST /api/users/login - Log in an existing user
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-    try {
-      // Code to authenticate user and return token
-      res.status(200).json({ message: 'Login successful', token: /* JWT token here */ });
-    } catch (error) {
-      res.status(500).json({ message: 'Error logging in', error });
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
-  });
+    const token = jwt.sign({ _id: user._id }, 'your_secret_key', { expiresIn: '1h' });
+    res.status(200).json({ message: 'Login successful', token });
+  } catch (error) {
+    res.status(500).json({ message: 'Error logging in', error });
+  }
+});
 
 
 
