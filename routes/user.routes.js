@@ -44,3 +44,22 @@ router.get('/profile', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error retrieving profile', error });
     }
   });
+
+
+  // PUT /api/users/profile - Update user profile (authentication required)
+router.put('/profile', authMiddleware, async (req, res) => {
+    const { username, email } = req.body;
+    try {
+      const user = await User.findById(req.user._id);
+      if (!user) return res.status(404).json({ message: 'User not found' });
+  
+      user.username = username ?? user.username;
+      user.email = email ?? user.email;
+      await user.save();
+  
+      res.status(200).json({ message: 'Profile updated successfully', user });
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating profile', error });
+    }
+  });
+  
