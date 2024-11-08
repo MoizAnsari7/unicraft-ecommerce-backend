@@ -65,4 +65,37 @@ router.post('/', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error adding product', error });
     }
   });
+
+
+
+// PUT /api/products/:productId - Update product details (admin only)
+router.put('/:productId', authMiddleware, async (req, res) => {
+    if (req.userRole !== 'admin') return res.status(403).json({ message: 'Access Denied' });
+  
+    const { name, description, category, brand, price, discountPrice, images, stock, attributes } = req.body;
+    try {
+      const updatedProduct = await Product.findByIdAndUpdate(
+        req.params.productId,
+        {
+          name,
+          description,
+          category,
+          brand,
+          price,
+          discountPrice,
+          images,
+          stock,
+          attributes,
+          updatedAt: Date.now()
+        },
+        { new: true }
+      );
+  
+      if (!updatedProduct) return res.status(404).json({ message: 'Product not found' });
+      res.status(200).json(updatedProduct);
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating product', error });
+    }
+  });
+  
   
