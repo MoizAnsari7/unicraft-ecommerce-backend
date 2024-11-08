@@ -35,3 +35,28 @@ router.post('/', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error adding brand', error });
     }
   });
+
+
+  // PUT /api/brands/:brandId - Update brand information (admin only)
+router.put('/:brandId', authMiddleware, async (req, res) => {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ message: 'Access Denied' });
+    }
+  
+    const { name, logo, description } = req.body;
+    try {
+      const updatedBrand = await Brands.findByIdAndUpdate(
+        req.params.brandId,
+        { name, logo, description, updatedAt: Date.now() },
+        { new: true }
+      );
+  
+      if (!updatedBrand) {
+        return res.status(404).json({ message: 'Brand not found' });
+      }
+  
+      res.status(200).json(updatedBrand);
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating brand', error });
+    }
+  });
