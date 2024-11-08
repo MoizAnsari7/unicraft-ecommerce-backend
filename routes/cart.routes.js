@@ -27,3 +27,32 @@ router.get('/', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Error retrieving cart', error });
   }
 });
+
+
+// POST /api/cart - Add a product to the cart
+router.post('/', authMiddleware, async (req, res) => {
+    const { productId, quantity } = req.body;
+    try {
+      let cart = await Cart.findOne({ userId: req.user._id });
+      if (!cart) {
+        cart = new Cart({ userId: req.user._id, items: [], total: 0 });
+      }
+  
+      // Check if item already exists in the cart
+      const existingItem = cart.items.find(item => item.productId.equals(productId));
+      if (existingItem) {
+        existingItem.quantity += quantity;
+      } else {
+        cart.items.push({ productId, quantity });
+      }
+  
+      // Update cart total
+      cart.total = await calculateCartTotal(cart.items);
+      await cart.save();
+  
+      res.status(200).json(cart);
+    } catch (error) {
+      res.status(500).json({ message: 'Error adding to cart', error });
+    }
+  });
+  
