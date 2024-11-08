@@ -13,3 +13,23 @@ router.get('/', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Error retrieving coupons', error });
   }
 });
+
+
+// POST /api/coupons - Create a new coupon (admin only)
+router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
+    const { code, discountPercentage, maxDiscountAmount, expiryDate, isActive } = req.body;
+    try {
+      const coupon = new Coupon({
+        code,
+        discountPercentage,
+        maxDiscountAmount,
+        expiryDate,
+        isActive: isActive ?? true // Default to true if not specified
+      });
+  
+      await coupon.save();
+      res.status(201).json(coupon);
+    } catch (error) {
+      res.status(500).json({ message: 'Error creating coupon', error });
+    }
+  });
