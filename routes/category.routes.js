@@ -91,6 +91,24 @@ router.delete('/:categoryId', authMiddleware, async (req, res) => {
     }
   });
   
+
+  // GET /api/categories/:categoryId/products - Retrieve products under a specific category, with pagination and sorting
+router.get('/:categoryId/products', async (req, res) => {
+    const { page = 1, limit = 10, sort = 'name' } = req.query;  // Pagination and sorting parameters
+    const categoryId = req.params.categoryId;
+  
+    try {
+      // Fetch products under this category
+      const products = await Product.find({ categoryId: categoryId })
+        .sort(sort)
+        .skip((page - 1) * limit)
+        .limit(Number(limit));
+  
+      res.status(200).json(products);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching products under category', error });
+    }
+  });
   
   
 
