@@ -74,3 +74,20 @@ router.get('/orders', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error retrieving order history', error });
     }
   });
+
+  
+  // POST /api/users/address - Add new address
+router.post('/address', authMiddleware, async (req, res) => {
+    const { street, city, state, country, postalCode } = req.body;
+    try {
+      const user = await User.findById(req.user._id);
+      if (!user) return res.status(404).json({ message: 'User not found' });
+  
+      user.addresses.push({ street, city, state, country, postalCode });
+      await user.save();
+  
+      res.status(201).json({ message: 'Address added successfully', addresses: user.addresses });
+    } catch (error) {
+      res.status(500).json({ message: 'Error adding address', error });
+    }
+  });
