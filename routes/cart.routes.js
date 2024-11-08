@@ -136,6 +136,26 @@ router.post('/save', authMiddleware, async (req, res) => {
   });
   
 
-
+// POST /api/cart/apply-coupon - Apply a coupon code to the cart
+router.post('/apply-coupon', authMiddleware, async (req, res) => {
+    const { couponId } = req.body;
+    try {
+      const cart = await Cart.findOne({ userId: req.user._id });
+      if (!cart) return res.status(404).json({ message: 'Cart not found' });
+  
+      const coupon = await Coupon.findById(couponId);
+      if (!coupon) return res.status(404).json({ message: 'Coupon not found' });
+  
+      cart.appliedCoupon = coupon._id;
+      cart.total = await calculateCartTotal(cart.items) * (1 - coupon.discount / 100);
+      await cart.save();
+  
+      res.status(200).json(cart);
+    } catch (error) {
+      res.status(500).json({ message: 'Error applying coupon', error });
+    }
+  });
+  
+  module.exports = router;
 
 
