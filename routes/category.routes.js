@@ -72,6 +72,26 @@ router.put('/:categoryId', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error updating category', error });
     }
   });
+
+
+  // DELETE /api/categories/:categoryId - Delete a category (admin only)
+router.delete('/:categoryId', authMiddleware, async (req, res) => {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ message: 'Access Denied' });
+    }
+  
+    try {
+      const deletedCategory = await Categories.findByIdAndDelete(req.params.categoryId);
+      if (!deletedCategory) {
+        return res.status(404).json({ message: 'Category not found' });
+      }
+      res.status(200).json({ message: 'Category deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deleting category', error });
+    }
+  });
+  
+  
   
 
   module.exports = router;
