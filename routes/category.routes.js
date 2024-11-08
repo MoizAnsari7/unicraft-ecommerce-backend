@@ -37,4 +37,17 @@ router.post('/', authMiddleware, async (req, res) => {
   });
   
 
+  // GET /api/categories/:categoryId - Get details for a specific category
+router.get('/:categoryId', async (req, res) => {
+    try {
+      const category = await Categories.findById(req.params.categoryId);
+      if (!category) {
+        return res.status(404).json({ message: 'Category not found' });
+      }
+      res.status(200).json(category);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching category', error });
+    }
+  });
+
   module.exports = router;
