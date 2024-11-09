@@ -34,3 +34,19 @@ router.post('/:orderId', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Error creating delivery activity', error });
   }
 });
+
+
+// GET /api/delivery-activities/:orderId - Get all delivery activities for a specific order
+router.get('/:orderId', authMiddleware, async (req, res) => {
+    try {
+      const activities = await DeliveryActivity.find({ orderId: req.params.orderId }).sort({ timestamp: 1 });
+      if (!activities || activities.length === 0) {
+        return res.status(404).json({ message: 'No delivery activities found for this order' });
+      }
+  
+      res.status(200).json(activities);
+    } catch (error) {
+      res.status(500).json({ message: 'Error retrieving delivery activities', error });
+    }
+  });
+  
