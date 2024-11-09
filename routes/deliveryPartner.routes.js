@@ -29,3 +29,26 @@ router.get('/', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error fetching partners', error });
     }
   });
+
+
+  // Update a delivery partner
+router.put('/:id', authMiddleware, async (req, res) => {
+    const { name, email, phone, activeOrder } = req.body;
+  
+    try {
+      const partner = await DeliveryPartner.findByIdAndUpdate(
+        req.params.id,
+        { name, email, phone, activeOrder },
+        { new: true }
+      );
+  
+      if (!partner) {
+        return res.status(404).json({ message: 'Partner not found' });
+      }
+  
+      res.status(200).json({ message: 'Partner updated', partner });
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating partner', error });
+    }
+  });
+  
