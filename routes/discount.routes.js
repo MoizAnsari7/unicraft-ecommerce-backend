@@ -44,3 +44,18 @@ router.put('/discounts/:discountId', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error updating discount', error });
     }
   });
+
+
+// DELETE /api/discounts/:discountId - Remove a discount (admin only)
+router.delete('/discounts/:discountId', authMiddleware, async (req, res) => {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+    try {
+      const discount = await Discount.findByIdAndDelete(req.params.discountId);
+      if (!discount) return res.status(404).json({ message: 'Discount not found' });
+      res.status(200).json({ message: 'Discount removed successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error removing discount', error });
+    }
+  });
