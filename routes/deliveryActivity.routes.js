@@ -75,4 +75,24 @@ router.put('/:activityId', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error updating delivery activity', error });
     }
   });
+
+
+  // DELETE /api/delivery-activities/:activityId - Delete a delivery activity
+router.delete('/:activityId', authMiddleware, async (req, res) => {
+    try {
+      const deliveryActivity = await DeliveryActivity.findByIdAndDelete(req.params.activityId);
+      if (!deliveryActivity) {
+        return res.status(404).json({ message: 'Delivery activity not found' });
+      }
+  
+      // Emit real-time update for tracking
+      req.app.io.emit('delivery-activity-deleted', { activityId: req.params.activityId });
+  
+      res.status(200).json({ message: 'Delivery activity deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deleting delivery activity', error });
+    }
+  });
+  
+  module.exports = router;
   
