@@ -51,3 +51,18 @@ router.put('/:id', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error updating coordinator', error });
     }
   });
+
+  // Delete a delivery coordinator
+router.delete('/:id', authMiddleware, async (req, res) => {
+    try {
+      const coordinator = await DeliveryCoordinator.findByIdAndDelete(req.params.id);
+      if (!coordinator) {
+        return res.status(404).json({ message: 'Coordinator not found' });
+      }
+      res.status(200).json({ message: 'Coordinator deleted' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deleting coordinator', error });
+    }
+  });
+  
+  module.exports = router;
