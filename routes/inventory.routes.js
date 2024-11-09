@@ -40,3 +40,29 @@ router.post('/inventory', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error updating inventory', error });
     }
   });
+
+
+
+// PUT /api/inventory/:productId - Update stock for a specific product (admin only)
+router.put('/inventory/:productId', authMiddleware, async (req, res) => {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+  
+    const { quantity, location } = req.body;
+    try {
+      const inventory = await Inventory.findOneAndUpdate(
+        { productId: req.params.productId },
+        { quantity, location },
+        { new: true }
+      );
+      if (!inventory) {
+        return res.status(404).json({ message: 'Inventory not found for this product' });
+      }
+      res.status(200).json({ message: 'Inventory updated successfully', inventory });
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating inventory', error });
+    }
+  });
+  
+  module.exports = router;
