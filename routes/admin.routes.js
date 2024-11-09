@@ -96,3 +96,17 @@ router.post('/permissions', authMiddleware, adminMiddleware, async (req, res) =>
       res.status(500).json({ message: 'Error updating permissions', error });
     }
   });
+
+
+  // GET /api/admin/tasks - View and manage pending tasks
+router.get('/tasks', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+      const tasks = [
+        { taskId: "1", description: "Check low stock for Product A", status: "pending" },
+        { taskId: "2", description: "Review sales report", status: "in-progress" }
+      ];
+      res.status(200).json(tasks);
+    } catch (error) {
+      res.status(500).json({ message: 'Error retrieving tasks', error });
+    }
+  });
