@@ -67,3 +67,18 @@ router.get('/reports/sales', authMiddleware, adminMiddleware, async (req, res) =
       res.status(500).json({ message: 'Error retrieving sales report', error });
     }
   });
+
+
+
+  // GET /api/admin/reports/inventory - View inventory levels and trends
+router.get('/reports/inventory', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+      const inventoryReport = [
+        { productId: "1", productName: "Product A", stockLevel: 50 },
+        { productId: "2", productName: "Product B", stockLevel: 20 }
+      ];
+      res.status(200).json(inventoryReport);
+    } catch (error) {
+      res.status(500).json({ message: 'Error retrieving inventory report', error });
+    }
+  });
