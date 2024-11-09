@@ -29,3 +29,25 @@ router.get('/', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error fetching coordinators', error });
     }
   });
+
+
+  // Update a delivery coordinator
+router.put('/:id', authMiddleware, async (req, res) => {
+    const { name, email } = req.body;
+  
+    try {
+      const coordinator = await DeliveryCoordinator.findByIdAndUpdate(
+        req.params.id,
+        { name, email },
+        { new: true }
+      );
+  
+      if (!coordinator) {
+        return res.status(404).json({ message: 'Coordinator not found' });
+      }
+  
+      res.status(200).json({ message: 'Coordinator updated', coordinator });
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating coordinator', error });
+    }
+  });
