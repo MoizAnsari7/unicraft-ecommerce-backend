@@ -18,3 +18,14 @@ router.post('/', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Error creating partner', error });
   }
 });
+
+
+// Get all delivery partners
+router.get('/', authMiddleware, async (req, res) => {
+    try {
+      const partners = await DeliveryPartner.find();
+      res.status(200).json(partners);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching partners', error });
+    }
+  });
