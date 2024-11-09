@@ -23,3 +23,20 @@ router.post('/notifications', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Error creating notification', error });
   }
 });
+
+
+// GET /api/notifications - Get all notifications for a user or admin
+router.get('/notifications', authMiddleware, async (req, res) => {
+    const { userId, adminId } = req.query;  // Filter by userId or adminId if provided
+  
+    try {
+      const query = {};
+      if (userId) query.userId = userId;
+      if (adminId) query.adminId = adminId;
+  
+      const notifications = await Notification.find(query).sort({ createdAt: -1 });
+      res.status(200).json(notifications);
+    } catch (error) {
+      res.status(500).json({ message: 'Error retrieving notifications', error });
+    }
+  });
