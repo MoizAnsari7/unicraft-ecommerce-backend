@@ -59,3 +59,16 @@ router.delete('/discounts/:discountId', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error removing discount', error });
     }
   });
+
+
+  // GET /api/discounts/active - Retrieve all active discounts
+router.get('/discounts/active', async (req, res) => {
+    try {
+      const activeDiscounts = await Discount.find({ isActive: true });
+      res.status(200).json(activeDiscounts);
+    } catch (error) {
+      res.status(500).json({ message: 'Error retrieving active discounts', error });
+    }
+  });
+  
+  module.exports = router;
