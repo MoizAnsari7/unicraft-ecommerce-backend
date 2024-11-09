@@ -52,3 +52,27 @@ router.put('/:id', authMiddleware, async (req, res) => {
     }
   });
   
+
+  // Update delivery partner location in real-time
+router.post('/:id/update-location', authMiddleware, async (req, res) => {
+    const { coordinates } = req.body;
+  
+    try {
+      const partner = await DeliveryPartner.findByIdAndUpdate(
+        req.params.id,
+        { coordinates },
+        { new: true }
+      );
+  
+      if (!partner) {
+        return res.status(404).json({ message: 'Partner not found' });
+      }
+  
+      // Emit location update for real-time tracking
+      req.app.io.emit('delivery-partner-location-updated', { partnerId: partner._id, coordinates });
+  
+      res.status(200).json({ message: 'Location updated successfully', partner });
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating location', error });
+    }
+  });
