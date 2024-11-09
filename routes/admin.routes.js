@@ -50,3 +50,20 @@ router.put('/users/:userId/role', authMiddleware, adminMiddleware, async (req, r
       res.status(500).json({ message: 'Error updating user role', error });
     }
   });
+
+
+
+// GET /api/admin/reports/sales - View sales report for a specific date range
+router.get('/reports/sales', authMiddleware, adminMiddleware, async (req, res) => {
+    const { startDate, endDate } = req.query;
+    try {
+      // Logic to retrieve sales data within the specified date range
+      const salesReport = [
+        { date: '2024-10-01', totalSales: 5000 },
+        { date: '2024-10-02', totalSales: 7000 }
+      ];
+      res.status(200).json(salesReport);
+    } catch (error) {
+      res.status(500).json({ message: 'Error retrieving sales report', error });
+    }
+  });
