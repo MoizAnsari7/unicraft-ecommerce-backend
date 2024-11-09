@@ -82,3 +82,17 @@ router.get('/reports/inventory', authMiddleware, adminMiddleware, async (req, re
       res.status(500).json({ message: 'Error retrieving inventory report', error });
     }
   });
+
+
+  // POST /api/admin/permissions - Define new permissions or modify existing ones
+router.post('/permissions', authMiddleware, adminMiddleware, async (req, res) => {
+    const { role, permissions } = req.body;
+    try {
+      // Logic to create or update permissions for a role
+      const updatedRole = { role, permissions };
+      // Example: update permissions in database if role exists
+      res.status(200).json({ message: 'Permissions updated successfully', updatedRole });
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating permissions', error });
+    }
+  });
