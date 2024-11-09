@@ -18,3 +18,14 @@ router.post('/', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Error creating coordinator', error });
   }
 });
+
+
+// Get all delivery coordinators
+router.get('/', authMiddleware, async (req, res) => {
+    try {
+      const coordinators = await DeliveryCoordinator.find();
+      res.status(200).json(coordinators);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching coordinators', error });
+    }
+  });
