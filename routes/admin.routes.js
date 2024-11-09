@@ -32,3 +32,21 @@ router.get('/users', authMiddleware, adminMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error retrieving users', error });
     }
   });
+
+
+  // PUT /api/admin/users/:userId/role - Update user role (e.g., promote to admin)
+router.put('/users/:userId/role', authMiddleware, adminMiddleware, async (req, res) => {
+    const { role, permissions } = req.body;
+    try {
+      const user = await User.findById(req.params.userId);
+      if (!user) return res.status(404).json({ message: 'User not found' });
+      
+      user.role = role ?? user.role;
+      user.permissions = permissions ?? user.permissions;
+      await user.save();
+  
+      res.status(200).json({ message: 'User role updated successfully', user });
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating user role', error });
+    }
+  });
