@@ -110,3 +110,17 @@ router.get('/tasks', authMiddleware, adminMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error retrieving tasks', error });
     }
   });
+
+
+  // POST /api/admin/notifications - Send notifications to specific admin layers
+router.post('/notifications', authMiddleware, adminMiddleware, async (req, res) => {
+    const { message, targetRoles } = req.body;
+    try {
+      // Logic to send notifications to admins with specified roles
+      res.status(200).json({ message: 'Notifications sent successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error sending notifications', error });
+    }
+  });
+  
+  module.exports = router;
