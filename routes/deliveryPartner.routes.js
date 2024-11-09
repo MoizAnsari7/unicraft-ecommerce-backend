@@ -76,3 +76,21 @@ router.post('/:id/update-location', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error updating location', error });
     }
   });
+
+
+
+
+// Delete a delivery partner
+router.delete('/:id', authMiddleware, async (req, res) => {
+    try {
+      const partner = await DeliveryPartner.findByIdAndDelete(req.params.id);
+      if (!partner) {
+        return res.status(404).json({ message: 'Partner not found' });
+      }
+      res.status(200).json({ message: 'Partner deleted' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deleting partner', error });
+    }
+  });
+  
+  module.exports = router;
