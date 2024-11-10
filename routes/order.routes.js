@@ -71,3 +71,17 @@ router.put('/orders/:orderId/status', authMiddleware, async (req, res) => {
     }
   });
   
+
+  // DELETE /api/orders/:orderId - Cancel an order if it’s in the allowed status
+router.delete('/orders/:orderId', authMiddleware, async (req, res) => {
+    try {
+      const order = await Order.findById(req.params.orderId);
+      if (!order || order.status !== 'Pending') {
+        return res.status(400).json({ message: 'Order cannot be canceled' });
+      }
+      await Order.findByIdAndDelete(req.params.orderId);
+      res.status(200).json({ message: 'Order canceled successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error canceling order', error });
+    }
+  });
