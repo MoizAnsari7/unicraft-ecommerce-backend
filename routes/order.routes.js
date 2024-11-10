@@ -47,3 +47,27 @@ router.get('/orders/:orderId', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error fetching order details', error });
     }
   });
+
+
+  // PUT /api/orders/:orderId/status - Update order status (admin only)
+router.put('/orders/:orderId/status', authMiddleware, async (req, res) => {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+  
+    const { status } = req.body;
+    try {
+      const order = await Order.findByIdAndUpdate(
+        req.params.orderId,
+        { status, updatedAt: Date.now() },
+        { new: true }
+      );
+      if (!order) {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+      res.status(200).json({ message: 'Order status updated successfully', order });
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating order status', error });
+    }
+  });
+  
