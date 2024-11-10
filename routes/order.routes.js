@@ -33,3 +33,17 @@ router.get('/orders', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error fetching orders', error });
     }
   });
+
+
+  // GET /api/orders/:orderId - Get order details
+router.get('/orders/:orderId', authMiddleware, async (req, res) => {
+    try {
+      const order = await Order.findById(req.params.orderId);
+      if (!order || (req.userRole !== 'admin' && order.userId.toString() !== req.user._id)) {
+        return res.status(404).json({ message: 'Order not found or access denied' });
+      }
+      res.status(200).json(order);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching order details', error });
+    }
+  });
