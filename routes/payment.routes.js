@@ -71,3 +71,40 @@ router.get('/payments/methods', (req, res) => {
       res.status(500).json({ message: 'Error retrieving payment status', error });
     }
   });
+
+
+  // POST /api/checkout - Finalize cart, confirm order, and initiate payment
+router.post('/checkout', authMiddleware, async (req, res) => {
+    const { items, shippingAddress, paymentMethod } = req.body;
+  
+    try {
+      // Calculate total and validate stock, discounts, etc.
+      const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  
+      // Create a new order
+      const order = new Order({
+        userId: req.user._id,
+        items,
+        shippingAddress,
+        total,
+      });
+      await order.save();
+  
+      // Initiate payment process
+      const payment = new Payment({
+        orderId: order._id,
+        userId: req.user._id,
+        amount: total,
+        paymentMethod,
+      });
+      await payment.save();
+  
+      // TODO: Generate payment URL or token with payment gateway
+      const paymentUrl = `https://payment-gateway.com/pay/${payment._id}`;  // Example placeholder URL
+  
+      res.status(201).json({ message: 'Checkout successful, proceed to payment', paymentUrl });
+    } catch (error) {
+      res.status(500).json({ message: 'Error during checkout', error });
+    }
+  });
+  
