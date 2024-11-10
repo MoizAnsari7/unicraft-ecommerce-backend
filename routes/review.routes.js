@@ -60,3 +60,27 @@ router.put('/reviews/:reviewId', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error updating review', error });
     }
   });
+
+
+
+// DELETE /api/reviews/:reviewId - Delete a review (auth required, for author or admin)
+router.delete('/reviews/:reviewId', authMiddleware, async (req, res) => {
+    try {
+      const review = await Review.findById(req.params.reviewId);
+      if (!review) {
+        return res.status(404).json({ message: 'Review not found' });
+      }
+  
+      // Allow deletion only if user is the author or an admin
+      if (review.userId.toString() !== req.user._id.toString() && !req.user.isAdmin) {
+        return res.status(403).json({ message: 'You are not allowed to delete this review' });
+      }
+  
+      await review.remove();
+      res.status(200).json({ message: 'Review deleted' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deleting review', error });
+    }
+  });
+  
+  module.exports = router;
