@@ -20,3 +20,21 @@ router.get('/reviews/:productId', async (req, res) => {
     res.status(500).json({ message: 'Error retrieving reviews', error });
   }
 });
+
+// POST /api/reviews/:productId - Add a review for a product (auth required)
+router.post('/reviews/:productId', authMiddleware, async (req, res) => {
+    const { rating, comment } = req.body;
+  
+    try {
+      const review = new Review({
+        productId: req.params.productId,
+        userId: req.user._id,
+        rating,
+        comment,
+      });
+      await review.save();
+      res.status(201).json({ message: 'Review added', review });
+    } catch (error) {
+      res.status(500).json({ message: 'Error adding review', error });
+    }
+  });
