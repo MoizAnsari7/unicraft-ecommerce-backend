@@ -38,3 +38,25 @@ router.post('/reviews/:productId', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error adding review', error });
     }
   });
+
+
+  // PUT /api/reviews/:reviewId - Update a review (auth required, only for author)
+router.put('/reviews/:reviewId', authMiddleware, async (req, res) => {
+    const { rating, comment } = req.body;
+  
+    try {
+      const review = await Review.findOne({ _id: req.params.reviewId, userId: req.user._id });
+      if (!review) {
+        return res.status(403).json({ message: 'You are not allowed to update this review' });
+      }
+  
+      review.rating = rating || review.rating;
+      review.comment = comment || review.comment;
+      review.updatedAt = Date.now();
+      await review.save();
+  
+      res.status(200).json({ message: 'Review updated', review });
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating review', error });
+    }
+  });
