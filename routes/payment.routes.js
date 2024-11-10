@@ -51,3 +51,23 @@ router.post('/payments/verify', async (req, res) => {
       res.status(500).json({ message: 'Error verifying payment', error });
     }
   });
+
+
+  // GET /api/payments/methods - Retrieve available payment methods
+router.get('/payments/methods', (req, res) => {
+    const paymentMethods = ['Credit Card', 'PayPal', 'Bank Transfer'];
+    res.status(200).json({ paymentMethods });
+  });
+  
+  // GET /api/payments/status/:paymentId - Check payment status for a transaction
+  router.get('/payments/status/:paymentId', async (req, res) => {
+    try {
+      const payment = await Payment.findById(req.params.paymentId);
+      if (!payment) {
+        return res.status(404).json({ message: 'Payment not found' });
+      }
+      res.status(200).json({ status: payment.status });
+    } catch (error) {
+      res.status(500).json({ message: 'Error retrieving payment status', error });
+    }
+  });
