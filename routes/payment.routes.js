@@ -108,3 +108,26 @@ router.post('/checkout', authMiddleware, async (req, res) => {
     }
   });
   
+
+// POST /api/checkout/confirm - Confirm order after payment verification
+router.post('/checkout/confirm', authMiddleware, async (req, res) => {
+    const { orderId, transactionId } = req.body;
+  
+    try {
+      const payment = await Payment.findOne({ orderId, transactionId });
+      if (!payment || payment.status !== 'Completed') {
+        return res.status(400).json({ message: 'Payment not verified or failed' });
+      }
+  
+      const order = await Order.findByIdAndUpdate(orderId, { status: 'Confirmed', updatedAt: Date.now() });
+      if (!order) {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+  
+      res.status(200).json({ message: 'Order confirmed successfully', order });
+    } catch (error) {
+      res.status(500).json({ message: 'Error confirming order', error });
+    }
+  });
+  
+  module.exports = router;
