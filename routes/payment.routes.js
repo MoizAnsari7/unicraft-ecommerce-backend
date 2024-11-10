@@ -24,3 +24,30 @@ router.post('/payments/create', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Error initiating payment', error });
   }
 });
+
+
+// POST /api/payments/verify - Verify payment after completion (callback from gateway)
+router.post('/payments/verify', async (req, res) => {
+    const { transactionId, status } = req.body;
+  
+    try {
+      const payment = await Payment.findOneAndUpdate(
+        { transactionId },
+        { status, updatedAt: Date.now() },
+        { new: true }
+      );
+  
+      if (!payment) {
+        return res.status(404).json({ message: 'Transaction not found' });
+      }
+  
+      // Update order status if payment is successful
+      if (status === 'Completed') {
+        await Order.findByIdAndUpdate(payment.orderId, { paymentStatus: 'Paid', updatedAt: Date.now() });
+      }
+  
+      res.status(200).json({ message: 'Payment verified', payment });
+    } catch (error) {
+      res.status(500).json({ message: 'Error verifying payment', error });
+    }
+  });
