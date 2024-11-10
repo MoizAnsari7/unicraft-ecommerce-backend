@@ -85,3 +85,19 @@ router.delete('/orders/:orderId', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error canceling order', error });
     }
   });
+
+
+  // GET /api/orders/track/:trackingNumber - Track the shipping status
+router.get('/orders/track/:trackingNumber', async (req, res) => {
+    try {
+      const order = await Order.findOne({ trackingNumber: req.params.trackingNumber });
+      if (!order) {
+        return res.status(404).json({ message: 'Tracking number not found' });
+      }
+      res.status(200).json({ status: order.status, trackingNumber: order.trackingNumber });
+    } catch (error) {
+      res.status(500).json({ message: 'Error tracking order', error });
+    }
+  });
+  
+  module.exports = router;
