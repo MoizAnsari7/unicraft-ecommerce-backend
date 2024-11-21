@@ -1,4 +1,6 @@
 const express = require('express');
+const DeliveryPartner = require('../model/DeliveryPartner.model');
+const authMiddleware = require('../middlewares/authMiddleware');
 const DeliveryPartner = require('../models/DeliveryPartner');
 const authMiddleware = require('../middleware/auth');
 const router = express.Router();

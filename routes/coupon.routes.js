@@ -1,4 +1,6 @@
 const express = require('express');
+const Coupon = require('../model/Coupon.model');
+const authMiddleware = require('../middlewares/authMiddleware');
 const Coupon = require('../models/Coupon');
 const authMiddleware = require('../middleware/auth');
 const router = express.Router();

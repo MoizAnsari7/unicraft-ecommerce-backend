@@ -1,7 +1,13 @@
 const express = require('express');
+
+const DeliveryActivity = require('../model/deliveryActivity.model');
+const Order = require('../model/Order.model');
+const authMiddleware = require('../middlewares/authMiddleware');
+
 const DeliveryActivity = require('../models/DeliveryActivity');
 const Order = require('../models/Order');
 const authMiddleware = require('../middleware/auth');
+
 const router = express.Router();
 
 // POST /api/delivery-activities/:orderId - Add a new delivery activity for a specific order

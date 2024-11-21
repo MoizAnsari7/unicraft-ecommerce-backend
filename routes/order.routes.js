@@ -1,4 +1,6 @@
 const express = require('express');
+const Order = require('../model/Order.model');
+const authMiddleware = require('../middlewares/authMiddleware');
 const Order = require('../models/Order');
 const authMiddleware = require('../middleware/auth');
 const router = express.Router();

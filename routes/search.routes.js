@@ -1,4 +1,5 @@
 const express = require('express');
+const Product = require('../model/Products.model'); // Assuming the Product model is set up with the necessary fields
 const Product = require('../models/Product'); // Assuming the Product model is set up with the necessary fields
 const router = express.Router();
 
