@@ -2,6 +2,9 @@ const express = require('express');
 const Review = require('../model/Review.model');
 const authMiddleware = require('../middlewares/authMiddleware');
 const adminMiddleware = require('../middlewares/authMiddleware');
+const Review = require('../models/Review');
+const authMiddleware = require('../middleware/auth');
+const adminMiddleware = require('../middleware/admin');
 const router = express.Router();
 
 // GET /api/reviews/:productId - Get all reviews for a product
