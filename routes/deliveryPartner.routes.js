@@ -1,0 +1,96 @@
+const express = require('express');
+const DeliveryPartner = require('../model/DeliveryPartner.model');
+const authMiddleware = require('../middlewares/authMiddleware');
+const router = express.Router();
+
+// Create a new delivery partner
+router.post('/', authMiddleware, async (req, res) => {
+  if (req.userRole !== 'admin') {
+    return res.status(403).json({ message: 'Access Denied' });
+  }
+
+  const { name, email, phone } = req.body;
+  try {
+    const partner = new DeliveryPartner({ name, email, phone });
+    await partner.save();
+    res.status(201).json({ message: 'Delivery partner created', partner });
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating partner', error });
+  }
+});
+
+
+// Get all delivery partners
+router.get('/', authMiddleware, async (req, res) => {
+    try {
+      const partners = await DeliveryPartner.find();
+      res.status(200).json(partners);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching partners', error });
+    }
+  });
+
+
+  // Update a delivery partner
+router.put('/:id', authMiddleware, async (req, res) => {
+    const { name, email, phone, activeOrder } = req.body;
+  
+    try {
+      const partner = await DeliveryPartner.findByIdAndUpdate(
+        req.params.id,
+        { name, email, phone, activeOrder },
+        { new: true }
+      );
+  
+      if (!partner) {
+        return res.status(404).json({ message: 'Partner not found' });
+      }
+  
+      res.status(200).json({ message: 'Partner updated', partner });
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating partner', error });
+    }
+  });
+  
+
+  // Update delivery partner location in real-time
+router.post('/:id/update-location', authMiddleware, async (req, res) => {
+    const { coordinates } = req.body;
+  
+    try {
+      const partner = await DeliveryPartner.findByIdAndUpdate(
+        req.params.id,
+        { coordinates },
+        { new: true }
+      );
+  
+      if (!partner) {
+        return res.status(404).json({ message: 'Partner not found' });
+      }
+  
+      // Emit location update for real-time tracking
+      req.app.io.emit('delivery-partner-location-updated', { partnerId: partner._id, coordinates });
+  
+      res.status(200).json({ message: 'Location updated successfully', partner });
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating location', error });
+    }
+  });
+
+
+
+
+// Delete a delivery partner
+router.delete('/:id', authMiddleware, async (req, res) => {
+    try {
+      const partner = await DeliveryPartner.findByIdAndDelete(req.params.id);
+      if (!partner) {
+        return res.status(404).json({ message: 'Partner not found' });
+      }
+      res.status(200).json({ message: 'Partner deleted' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deleting partner', error });
+    }
+  });
+  
+  module.exports = router;
