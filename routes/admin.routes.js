@@ -1,7 +1,13 @@
 const express = require('express');
+
 const User = require('../model/Users.model'); // Assuming User schema includes fields for role and permissions
 const authMiddleware = require('../middlewares/authMiddleware');
 const adminMiddleware = require('../middlewares/adminMiddleware');
+
+const User = require('../models/User'); // Assuming User schema includes fields for role and permissions
+const authMiddleware = require('../middleware/authMiddleware');
+const adminMiddleware = require('../middleware/adminMiddleware');
+
 const router = express.Router();
 
 // GET /api/admin/dashboard - Get an overview of key metrics
@@ -85,6 +91,7 @@ router.get('/reports/inventory', authMiddleware, adminMiddleware, async (req, re
 
 
   // POST /api/admin/permissions - Define new permissions or modify existing ones
+
   router.post('/permissions', authMiddleware, adminMiddleware, async (req, res) => {
     const { role, permissions } = req.body;
   
@@ -96,13 +103,22 @@ router.get('/reports/inventory', authMiddleware, adminMiddleware, async (req, re
       // Assume you have a Roles collection in your DB
       const roleData = await Role.findOneAndUpdate({ role }, { permissions }, { new: true, upsert: true });
       res.status(200).json({ message: 'Permissions updated successfully', roleData });
+
+router.post('/permissions', authMiddleware, adminMiddleware, async (req, res) => {
+    const { role, permissions } = req.body;
+    try {
+      // Logic to create or update permissions for a role
+      const updatedRole = { role, permissions };
+      // Example: update permissions in database if role exists
+      res.status(200).json({ message: 'Permissions updated successfully', updatedRole });
+
     } catch (error) {
       res.status(500).json({ message: 'Error updating permissions', error });
     }
   });
 
 
-  
+
   // GET /api/admin/tasks - View and manage pending tasks
 router.get('/tasks', authMiddleware, adminMiddleware, async (req, res) => {
     try {
@@ -128,6 +144,5 @@ router.post('/notifications', authMiddleware, adminMiddleware, async (req, res) 
     }
   });
   
-
 
   module.exports = router;

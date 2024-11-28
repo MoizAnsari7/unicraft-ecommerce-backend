@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const Product = require('../model/Products.model');
 const authMiddleware = require('../middlewares/authMiddleware'); // Middleware for admin check
+const Product = require('../models/Product');
+const authMiddleware = require('../middleware/auth'); // Middleware for admin check
 const router = express.Router();
 
 // GET /api/products - Retrieve products with optional filters and pagination

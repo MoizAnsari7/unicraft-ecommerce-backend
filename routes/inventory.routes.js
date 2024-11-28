@@ -1,6 +1,8 @@
 const express = require('express');
 const Inventory = require('../model/Inventory.model');
 const authMiddleware = require('../middlewares/authMiddleware');
+const Inventory = require('../models/Inventory');
+const authMiddleware = require('../middleware/auth');
 const router = express.Router();
 
 // GET /api/inventory/:productId - Get current stock level of a product
