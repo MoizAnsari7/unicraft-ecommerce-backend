@@ -5,8 +5,8 @@ const ProductSchema = new mongoose.Schema({
     _id: { type: ObjectId, auto: true },
     name: { type: String, required: true, trim: true },
     description: { type: String, trim: true },
-    category: { type: ObjectId, ref: "Categories", required: true }, // References Category ID
-    brand: { type: ObjectId, ref: "Brands" }, // References Brand ID
+    // category: { type: ObjectId, ref: "Categories", required: true }, // References Category ID
+    // brand: { type: ObjectId, ref: "Brands" }, // References Brand ID
     price: { type: Number, required: true },
     discountPrice: { type: Number }, // Optional, if a discount is active
     images: [{ type: String }], // Array of image URLs
