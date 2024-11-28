@@ -5,6 +5,19 @@ const mongoose = require('mongoose');
 const IndexRoutes = require('./routes/index');
 
 const app = express(); // Initialize express app
+
+const cors = require('cors');
+// CORS configuration
+const corsOptions = {
+  origin: 'http://localhost:4200', // Replace with your frontend's URL
+  methods: 'GET,POST,PUT,DELETE',
+  allowedHeaders: 'Authorization,Content-Type',
+  credentials: true, // Allow credentials (cookies, etc.)
+};
+
+app.use(cors(corsOptions));
+
+
 const server = http.createServer(app); // Create HTTP server
 const io = socketIo(server, {
   cors: {
@@ -29,8 +42,6 @@ app.use((req, res, next) => {
   next();
 });
 
-const cors = require('cors');
-app.use(cors());  // Allow all origins
 
 
 // Define the API route

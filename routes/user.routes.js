@@ -5,6 +5,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+require('dotenv').config();
 
  
 // POST /api/users/register - Register a new user
@@ -32,7 +33,19 @@ router.post('/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
-    const token = jwt.sign({ _id: user._id }, 'your_secret_key', { expiresIn: '1h' });
+    const token = jwt.sign( { _id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' });
+ console.log("secretKey", process.env.JWT_SECRET);
+ 
+    // Set token in HttpOnly cookie
+  res.cookie('token', token, {
+    httpOnly: true,     // Prevent access by JavaScript
+    secure: process.env.NODE_ENV === 'production',      // Send cookie only over HTTPS
+    sameSite: 'strict', // Prevent cross-site attacks
+    maxAge: 3600000,    // Set expiration (1 hour)
+  });
+
     res.status(200).json({ message: 'Login successful', token });
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error });

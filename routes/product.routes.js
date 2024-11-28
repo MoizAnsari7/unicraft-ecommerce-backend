@@ -45,7 +45,7 @@ router.get('/:productId', async (req, res) => {
 
 
   // POST /api/products - Add a new product (admin only)
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/addProduct', authMiddleware, async (req, res) => {
     if (req.userRole !== 'admin') return res.status(403).json({ message: 'Access Denied' });
   
     const { name, description, category, brand, price, discountPrice, images, stock, attributes } = req.body;
@@ -62,9 +62,11 @@ router.post('/', authMiddleware, async (req, res) => {
         attributes
       });
       await newProduct.save();
+      console.log(res)
       res.status(201).json(newProduct);
     } catch (error) {
       res.status(500).json({ message: 'Error adding product', error });
+      console.log(error)
     }
   });
 
