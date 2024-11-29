@@ -14,7 +14,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     try {
       const categories = await Categories.find({});
-      res.status(200).json(categories);
+      res.status(200).json({message: "Categories Fetching",categories});
     } catch (error) {
       res.status(500).json({ message: 'Error fetching categories', error });
     }
@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
 
 
   // POST /api/categories - Create a new category (admin only)
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/addCategory', authMiddleware, async (req, res) => {
     if (req.userRole !== 'admin') {
       return res.status(403).json({ message: 'Access Denied' });
     }
@@ -35,7 +35,7 @@ router.post('/', authMiddleware, async (req, res) => {
         parentCategoryId: parentCategoryId || null,
       });
       await newCategory.save();
-      res.status(201).json(newCategory);
+      res.status(201).json({ message: 'Category Added', newCategory });
     } catch (error) {
       res.status(500).json({ message: 'Error creating category', error });
     }
@@ -62,17 +62,17 @@ router.put('/:categoryId', authMiddleware, async (req, res) => {
       return res.status(403).json({ message: 'Access Denied' });
     }
   
-    const { name, description, parentCategoryId } = req.body;
+    const { name } = req.body;
     try {
       const updatedCategory = await Categories.findByIdAndUpdate(
         req.params.categoryId,
-        { name, description, parentCategoryId: parentCategoryId || null },
+        { name },
         { new: true }
       );
       if (!updatedCategory) {
         return res.status(404).json({ message: 'Category not found' });
       }
-      res.status(200).json(updatedCategory);
+      res.status(200).json({message : "Category Updated", updatedCategory});
     } catch (error) {
       res.status(500).json({ message: 'Error updating category', error });
     }
@@ -81,6 +81,8 @@ router.put('/:categoryId', authMiddleware, async (req, res) => {
 
   // DELETE /api/categories/:categoryId - Delete a category (admin only)
 router.delete('/:categoryId', authMiddleware, async (req, res) => {
+  console.log("delete", req.params);
+  
     if (req.userRole !== 'admin') {
       return res.status(403).json({ message: 'Access Denied' });
     }

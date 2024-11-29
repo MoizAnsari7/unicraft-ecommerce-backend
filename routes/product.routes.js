@@ -45,15 +45,20 @@ router.get('/:productId', async (req, res) => {
 
 
   // POST /api/products - Add a new product (admin only)
-router.post('/addProduct', authMiddleware, async (req, res) => {
+router.post('/:categoryId/addProduct', authMiddleware, async (req, res) => {
     if (req.userRole !== 'admin') return res.status(403).json({ message: 'Access Denied' });
   
-    const { name, description, category, brand, price, discountPrice, images, stock, attributes } = req.body;
+    const { name, description, brand, price, discountPrice, images, stock, attributes } = req.body;
     try {
+
+      const categoryExists = await Categories.findById(req.params.categoryId);
+      if (!categoryExists) {
+        return res.status(404).json({ message: 'Category not found' });
+      }
       const newProduct = new Product({
         name,
         description,
-        category,
+        category: req.params.categoryId,
         brand,
         price,
         discountPrice,

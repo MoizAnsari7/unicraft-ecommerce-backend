@@ -25,7 +25,7 @@ const userRoutes = require("./user.routes");
 router.use("/admin", adminRoutes);
 router.use("/brand", brandRoutes);
 router.use("/cart", cartRoutes);
-router.use("/category", CategoryRoutes);
+router.use("/category", CategoryRoutes); //addCategory
 router.use("/coupon", couponRoutes);
 router.use("/deliveryActivity", deliveryActivityRoutes);
 router.use("/deliveryCoordinator", deliveryCoordinatorRoutes);
