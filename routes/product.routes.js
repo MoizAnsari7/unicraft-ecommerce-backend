@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const Product = require('../model/Products.model');
-const authMiddleware = require('../middlewares/authMiddleware'); // Middleware for admin check
+const authMiddleware = require('../middlewares/authMiddleware');
+const Categories = require("../model/Categories.model"); // Middleware for admin check
 const router = express.Router();
 
 // GET /api/products - Retrieve products with optional filters and pagination
@@ -21,7 +22,7 @@ router.get('/', async (req, res) => {
   if (sort === 'date') sortOption.createdAt = -1;
 
   try {
-    const products = await Product.find(filter)
+    const products = await Product.find(filter).populate('category')
       .sort(sortOption)
       .exec();
     res.status(200).json(products);
@@ -42,36 +43,72 @@ router.get('/:productId', async (req, res) => {
   });
 
 
-  // POST /api/products - Add a new product (admin only)
-router.post('/:categoryId/addProduct', authMiddleware, async (req, res) => {
-    if (req.userRole !== 'admin') return res.status(403).json({ message: 'Access Denied' });
-  
-    const { name, description, brand, price, discountPrice, images, stock, attributes } = req.body;
-    try {
+ // POST /api/products/addProduct - Add a new product (admin only)
+router.post('/addProduct', authMiddleware, async (req, res) => {
+  // Check if the user has admin privileges
+  if (req.userRole !== 'admin') {
+      return res.status(403).json({ message: 'Access Denied: Only admins can add products.' });
+  }
 
-      const categoryExists = await Categories.findById(req.params.categoryId);
-      if (!categoryExists) {
-        return res.status(404).json({ message: 'Category not found' });
+  const {
+      name,
+      description,
+      category, // Category ID from request body
+      brand,
+      price,
+      discountPrice,
+      images,
+      stock,
+      attributes,
+  } = req.body;
+
+  console.log('Incoming Payload:', req.body);
+
+  try {
+      // Validate required fields
+      if (!name || !price || !stock || !category) {
+          return res.status(400).json({ message: 'Missing required fields: name, price, stock, or category.' });
       }
+
+      // Check if the category exists
+      const categoryExists = await Categories.findById(category);
+      if (!categoryExists) {
+          return res.status(404).json({ message: 'Category not found. Please provide a valid category ID.' });
+      }
+
+      // Create a new product instance
       const newProduct = new Product({
-        name,
-        description,
-        category: req.params.categoryId,
-        brand,
-        price,
-        discountPrice,
-        images,
-        stock,
-        attributes
+          name,
+          description: description || '',
+          category, // Reference the existing category ID
+          brand: brand || '',
+          price,
+          discountPrice: discountPrice || null,
+          images: images || [],
+          stock,
+          attributes : attributes || {},
       });
+
+      // Save the new product to the database
       await newProduct.save();
-      console.log(res)
-      res.status(201).json(newProduct);
-    } catch (error) {
-      res.status(500).json({ message: 'Error adding product', error });
-      console.log(error)
-    }
-  });
+
+      // Send success response
+      res.status(201).json({
+          message: 'Product added successfully!',
+          product: newProduct,
+      });
+      console.log("Product successfully added:", newProduct);
+  } catch (error) {
+      // Handle errors and send appropriate response
+      console.error('Error adding product:', error);
+      res.status(500).json({
+          message: 'Internal Server Error: Could not add product.',
+          error: error.message,
+      });
+  }
+});
+
+  
 
 
 
@@ -96,10 +133,10 @@ router.put('/:productId', authMiddleware, async (req, res) => {
           updatedAt: Date.now()
         },
         { new: true }
-      );
+      ).populate('category');
   
       if (!updatedProduct) return res.status(404).json({ message: 'Product not found' });
-      res.status(200).json(updatedProduct);
+      res.status(200).json({ message: 'Product Updated' ,updatedProduct});
     } catch (error) {
       res.status(500).json({ message: 'Error updating product', error });
     }
