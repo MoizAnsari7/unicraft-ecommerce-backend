@@ -9,10 +9,10 @@ const ProductSchema = new mongoose.Schema({
     // brand: { type: ObjectId, ref: "Brands" }, // References Brand ID
     price: { type: Number, required: true },
     discountPrice: { type: Number }, // Optional, if a discount is active
-    images: [{ type: String }], // Array of image URLs
+    images: [{ type: String, default: [] }], // Default to an empty array
+attributes: { type: Map, of: String, default: {} }, // Default to an empty object
     rating: { type: Number, default: 0 },
     stock: { type: Number, required: true },
-    attributes: { type: Map, of: String }, // Dynamic attributes
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 });

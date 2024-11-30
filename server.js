@@ -28,6 +28,7 @@ const io = socketIo(server, {
 
 // Middleware to parse JSON requests
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Attach `io` instance to `req` for use in routes
 const deliveryActivityRoutes = require('./routes/deliveryActivity');
