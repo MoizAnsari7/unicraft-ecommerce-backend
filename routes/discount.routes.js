@@ -1,6 +1,8 @@
 const express = require('express');
 const Discount = require('../model/Discount.model');
 const authMiddleware = require('../middlewares/authMiddleware');
+const Discount = require('../models/Discount');
+const authMiddleware = require('../middleware/auth');
 const router = express.Router();
 
 // POST /api/discounts - Create a new discount (admin only)

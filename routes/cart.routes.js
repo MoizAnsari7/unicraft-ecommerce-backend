@@ -3,6 +3,10 @@ const Cart = require('../model/Carts.model');
 const Product = require('../model/Products.model');
 const Coupon = require('../model/Coupon.model');
 const authMiddleware = require('../middlewares/authMiddleware'); // Middleware for user authentication
+const Cart = require('../models/Cart');
+const Product = require('../models/Product');
+const Coupon = require('../models/Coupon');
+const authMiddleware = require('../middleware/auth'); // Middleware for user authentication
 const router = express.Router();
 
 // Helper function to calculate cart total
