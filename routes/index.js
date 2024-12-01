@@ -35,7 +35,7 @@ router.use("/inventory", inventoryRoutes);
 router.use("/notification", notificationRoutes);
 router.use("/order", orderRoutes);
 router.use("/payment", paymentRoutes);
-router.use("/product", productRoutes);
+router.use("/products", productRoutes);
 router.use("/review", reviewRoutes);
 router.use("/search", searchRoutes);
 router.use("/users", userRoutes);
