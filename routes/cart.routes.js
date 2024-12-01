@@ -29,6 +29,7 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 
+
 // POST /api/cart - Add a product to the cart
 router.post('/', authMiddleware, async (req, res) => {
     const { productId, quantity } = req.body;
