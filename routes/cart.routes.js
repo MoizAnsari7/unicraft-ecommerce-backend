@@ -24,7 +24,7 @@ async function calculateCartTotal(items) {
 // GET /api/cart - Retrieve the user's current cart
 router.get('/', authMiddleware, async (req, res) => {
     try {
-        const cart = await Cart.findOne({ userId: req.user._id });
+        const cart = await Cart.findOne({ userId: req.userId });
         if (!cart) return res.status(404).json({ message: 'Cart not found' });
         res.status(200).json(cart);
     } catch (error) {
@@ -33,13 +33,18 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 
+
 // POST /api/cart - Add a product to the cart
 router.post('/', authMiddleware, async (req, res) => {
     const { productId, quantity } = req.body;
     try {
-        let cart = await Cart.findOne({ userId: req.user._id });
+
+      console.log("backend res", req.body);
+      console.log("backend res", req.userId);
+      
+        let cart = await Cart.findOne({ userId: req.userId });
         if (!cart) {
-            cart = new Cart({ userId: req.user._id, items: [], total: 0 });
+            cart = new Cart({ userId: req.userId, items: [], total: 0 });
         }
 
         // Check if item already exists in the cart
@@ -48,7 +53,7 @@ router.post('/', authMiddleware, async (req, res) => {
             existingItem.quantity += quantity;
         } else {
             cart.items.push({ productId, quantity });
-        }
+        } 
 
         // Update cart total
         cart.total = await calculateCartTotal(cart.items);

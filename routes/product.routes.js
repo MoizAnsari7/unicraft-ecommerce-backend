@@ -37,6 +37,22 @@ router.get('/', async (req, res) => {
   }
 }); 
 
+
+// GET /api/allProducts/ - Get All product
+router.get('/allProducts', async (req, res) => {
+  try {
+    const product = await Product.find();
+    console.log(product);
+    
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.status(200).json({ message: 'Product not found' , product});
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching product details', error });
+  }
+});
+
+
+
 // GET /api/products/:productId - Get details of a specific product
 router.get('/:productId', async (req, res) => {
     try {
