@@ -32,7 +32,7 @@ router.get('/', authMiddleware, async (req, res) => {
 
 // POST /api/cart - Add a product to the cart
 router.post('/', authMiddleware, async (req, res) => {
-    const { productId, quantity } = req.body;
+    const { productId, quantity, price } = req.body;
     try {
 
       console.log("backend res", req.body);
@@ -48,7 +48,7 @@ router.post('/', authMiddleware, async (req, res) => {
         if (existingItem) {
             existingItem.quantity += quantity;
         } else {
-            cart.items.push({ productId, quantity });
+            cart.items.push({ productId, quantity, price  });
         } 
 
         // Update cart total
@@ -65,9 +65,12 @@ router.post('/', authMiddleware, async (req, res) => {
 
 // PUT /api/cart/:productId - Update the quantity of a product in the cart
 router.put('/:productId', authMiddleware, async (req, res) => {
-    const { quantity } = req.body;
+    const { quantity  } = req.body;
     try {
-        const cart = await Cart.findOne({ userId: req.user._id });
+      if (!Number.isInteger(quantity) || quantity <= 0) {
+        return res.status(400).json({ message: 'Invalid quantity' });
+      }
+        const cart = await Cart.findOne({ userId: req.userId });
         if (!cart) return res.status(404).json({ message: 'Cart not found' });
 
         const item = cart.items.find(item => item.productId.equals(req.params.productId));
@@ -75,7 +78,7 @@ router.put('/:productId', authMiddleware, async (req, res) => {
             item.quantity = quantity;
             cart.total = await calculateCartTotal(cart.items);
             await cart.save();
-            res.status(200).json(cart);
+            res.status(200).json({message : "Quantity updated", cart});
         } else {
             res.status(404).json({ message: 'Product not found in cart' });
         }
@@ -88,14 +91,14 @@ router.put('/:productId', authMiddleware, async (req, res) => {
 // DELETE /api/cart/:productId - Remove a product from the cart
 router.delete('/:productId', authMiddleware, async (req, res) => {
     try {
-        const cart = await Cart.findOne({ userId: req.user._id });
+        const cart = await Cart.findOne({ userId: req.userId });
         if (!cart) return res.status(404).json({ message: 'Cart not found' });
 
         cart.items = cart.items.filter(item => !item.productId.equals(req.params.productId));
         cart.total = await calculateCartTotal(cart.items);
         await cart.save();
 
-        res.status(200).json(cart);
+        res.status(200).json({message:"Cart Item Delete", cart});
     } catch (error) {
         res.status(500).json({ message: 'Error removing item from cart', error });
     }
