@@ -167,6 +167,38 @@ router.post('/apply-coupon', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error applying coupon', error });
     }
   });
+
+
+
+//multiple Cart as login
+  router.post('/multiple', authMiddleware, async (req, res) => {
+    try {
+      const { items } = req.body;
+      const cart = await Cart.findOne({ userId: req.userId });
+  
+      if (!cart) {
+        return res.status(404).json({ message: 'Cart not found' });
+      }
+  
+      items.forEach((item) => {
+        const existingItem = cart.items.find((i) => i.productId.equals(item.productId));
+        if (existingItem) {
+          existingItem.quantity += item.quantity; // Increment quantity if item exists
+        } else {
+          cart.items.push(item); // Add new item
+        }
+      });
+  
+      cart.total = await calculateCartTotal(cart.items);
+      await cart.save();
+  
+      res.status(200).json({ message: 'Cart updated successfully', cart });
+    } catch (error) {
+      res.status(500).json({ message: 'Error adding items to cart', error });
+    }
+  });
+
+  
   
   module.exports = router;
 

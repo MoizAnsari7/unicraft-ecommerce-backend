@@ -3,6 +3,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const mongoose = require('mongoose');
 const IndexRoutes = require('./routes/index');
+const path = require('path');
 
 const app = express(); // Initialize express app
 
@@ -15,7 +16,11 @@ const corsOptions = {
   credentials: true, // Allow credentials (cookies, etc.)
 };
 
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cors(corsOptions));
+
+
 
 
 const server = http.createServer(app); // Create HTTP server

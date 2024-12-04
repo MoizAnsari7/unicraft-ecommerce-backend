@@ -10,6 +10,8 @@ const Product = require('../models/Product');
 const authMiddleware = require('../middleware/auth'); // Middleware for admin check
 
 const router = express.Router();
+const uploads = require('../multer');
+
 
 // GET /api/products - Retrieve products with optional filters and pagination
 router.get('/', async (req, res) => {
@@ -38,14 +40,23 @@ router.get('/', async (req, res) => {
 }); 
 
 
-// GET /api/allProducts/ - Get All product
+// GET /api/allProducts/ - Get All products
 router.get('/allProducts', async (req, res) => {
   try {
-    const product = await Product.find();
-    console.log(product);
+    const products = await Product.find();
     
-    if (!product) return res.status(404).json({ message: 'Product not found' });
-    res.status(200).json({ message: 'Product not found' , product});
+    if (!products || products.length === 0) {
+      return res.status(404).json({ message: 'No products found' });
+    }
+    
+    const updatedProducts = products.map(product => ({
+      ...product.toObject(),
+      imagePath: product.images && product.images[0]
+        ? `http://localhost:3000/${product.images[0]}`
+        : null, // Handle cases with no image
+    }));
+    
+    res.status(200).json({ message: 'Products found', products: updatedProducts });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching product details', error });
   }
@@ -66,37 +77,44 @@ router.get('/:productId', async (req, res) => {
 
 
  // POST /api/products/addProduct - Add a new product (admin only)
-router.post('/addProduct', authMiddleware, async (req, res) => {
+router.post('/addProduct' , authMiddleware, uploads.array('images',5), async (req, res) => {
+  console.log('Uploaded files:', req.files);
+  
   // Check if the user has admin privileges
   if (req.userRole !== 'admin') {
-      return res.status(403).json({ message: 'Access Denied: Only admins can add products.' });
+    return res.status(403).json({ message: 'Access Denied: Only admins can add products.' });
   }
 
+  
   const {
-      name,
-      description,
-      category, // Category ID from request body
-      brand,
+    name,
+    description,
+    category, // Category ID from request body
+    brand,
       price,
       discountPrice,
       images,
       stock,
-      attributes,
-  } = req.body;
-
-  console.log('Incoming Payload:', req.body);
-
-  try {
+      attributes ,
+    } = req.body;
+    
+    console.log('Incoming Payload:', req.body);
+    
+    try {
       // Validate required fields
       if (!name || !price || !stock || !category) {
-          return res.status(400).json({ message: 'Missing required fields: name, price, stock, or category.' });
+        return res.status(400).json({ message: 'Missing required fields: name, price, stock, or category.' });
       }
-
+      
       // Check if the category exists
       const categoryExists = await Categories.findById(category);
       if (!categoryExists) {
-          return res.status(404).json({ message: 'Category not found. Please provide a valid category ID.' });
+        return res.status(404).json({ message: 'Category not found. Please provide a valid category ID.' });
       }
+      
+      
+      const parsedAttributes = attributes ? JSON.parse(attributes) : {};
+      const imagePaths = req.files.map((file) => `uploads/${file.filename}`);
 
       // Create a new product instance
       const newProduct = new Product({
@@ -106,9 +124,9 @@ router.post('/addProduct', authMiddleware, async (req, res) => {
           brand: brand || '',
           price,
           discountPrice: discountPrice || null,
-          images: images || [],
+          images: imagePaths,
           stock,
-          attributes : attributes || {},
+          attributes : parsedAttributes,
       });
 
       // Save the new product to the database
