@@ -20,9 +20,9 @@ async function calculateCartTotal(items) {
 // GET /api/cart - Retrieve the user's current cart
 router.get('/', authMiddleware, async (req, res) => {
     try {
-        const cart = await Cart.findOne({ userId: req.userId });
+        const cart = await Cart.findOne({ userId: req.userId }).populate('items.productId');
         if (!cart) return res.status(404).json({ message: 'Cart not found' });
-        res.status(200).json(cart);
+        res.status(200).json({message:"cart found", cart});
     } catch (error) {
         res.status(500).json({ message: 'Error retrieving cart', error });
     }
