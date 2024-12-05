@@ -1,33 +1,52 @@
 const express = require('express');
 const Order = require('../model/Order.model');
+const Cart = require('../model/Carts.model');
 const authMiddleware = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 // POST /api/orders - Place a new order (Validates cart and checks stock)
-router.post('/orders', authMiddleware, async (req, res) => {
-  const { items, shippingAddress, total } = req.body;
-
+router.post('/placeOrders', authMiddleware, async (req, res) => {
+  const { items, shippingAddress, total,paymentMethod } = req.body;
   try {
     const order = new Order({
-      userId: req.user._id,
+      userId: req.userId,
       items,
       shippingAddress,
       total,
+      paymentMethod
     });
     await order.save();
     res.status(201).json({ message: 'Order placed successfully', order });
   } catch (error) {
+    console.error('Error placing order:', error);
     res.status(500).json({ message: 'Error placing order', error });
+  }
+});
+
+
+// Clear the user's cart after successful order placement
+router.delete('/clearCart', authMiddleware, async (req, res) => {
+  try {
+    console.log(req.userId);
+    
+    const result = await Cart.deleteOne({ userId: req.userId }); // Assuming you have a Cart model
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'Cart not found' });
+    }
+    res.status(200).json({ message: 'Cart cleared successfully' });
+  } catch (error) {
+    console.error('Error clearing cart:', error);
+    res.status(500).json({ message: 'Error clearing cart', error });
   }
 });
 
 
 // GET /api/orders - Get list of orders (admin sees all, user sees only their orders)
 router.get('/orders', authMiddleware, async (req, res) => {
-    const query = req.userRole === 'admin' ? {} : { userId: req.user._id };
+    const query = req.userRole === 'admin' ? {} : { userId: req.userId };
   
     try {
-      const orders = await Order.find(query).sort({ createdAt: -1 });
+      const orders = await Order.find({userId: req.userId }).sort({ createdAt: -1 });
       res.status(200).json(orders);
     } catch (error) {
       res.status(500).json({ message: 'Error fetching orders', error });
@@ -73,7 +92,7 @@ router.put('/orders/:orderId/status', authMiddleware, async (req, res) => {
   
 
   // DELETE /api/orders/:orderId - Cancel an order if it’s in the allowed status
-router.delete('/orders/:orderId', authMiddleware, async (req, res) => {
+router.delete('/:orderId', authMiddleware, async (req, res) => {
     try {
       const order = await Order.findById(req.params.orderId);
       if (!order || order.status !== 'Pending') {
