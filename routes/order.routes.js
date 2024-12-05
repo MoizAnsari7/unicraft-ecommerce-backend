@@ -47,7 +47,7 @@ router.get('/orders', authMiddleware, async (req, res) => {
   
     try {
       const orders = await Order.find({userId: req.userId }).sort({ createdAt: -1 });
-      res.status(200).json(orders);
+      res.status(200).json({orders});
     } catch (error) {
       res.status(500).json({ message: 'Error fetching orders', error });
     }
@@ -61,7 +61,7 @@ router.get('/orders/:orderId', authMiddleware, async (req, res) => {
       if (!order || (req.userRole !== 'admin' && order.userId.toString() !== req.user._id)) {
         return res.status(404).json({ message: 'Order not found or access denied' });
       }
-      res.status(200).json(order);
+      res.status(200).json({orders :order});
     } catch (error) {
       res.status(500).json({ message: 'Error fetching order details', error });
     }
@@ -99,7 +99,7 @@ router.delete('/:orderId', authMiddleware, async (req, res) => {
         return res.status(400).json({ message: 'Order cannot be canceled' });
       }
       await Order.findByIdAndDelete(req.params.orderId);
-      
+
       res.status(200).json({ message: 'Order canceled successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Error canceling order', error });

@@ -4,6 +4,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const upload = require('../multer')
 require('dotenv').config();
 
  
@@ -56,9 +57,9 @@ router.post('/login', async (req, res) => {
 // GET /api/users/profile - Get user profile (authentication required)
 router.get('/profile', authMiddleware, async (req, res) => {
     try {
-      const user = await User.findById(req.user._id);
+      const user = await User.findById(req.userId);
       if (!user) return res.status(404).json({ message: 'User not found' });
-      res.status(200).json(user);
+      res.status(200).json({message:"Profile fecthing...", user});
     } catch (error) {
       res.status(500).json({ message: 'Error retrieving profile', error });
     }
@@ -69,7 +70,7 @@ router.get('/profile', authMiddleware, async (req, res) => {
 router.put('/profile', authMiddleware, async (req, res) => {
     const { username, email } = req.body;
     try {
-      const user = await User.findById(req.user._id);
+      const user = await User.findById(req.userId);
       if (!user) return res.status(404).json({ message: 'User not found' });
   
       user.username = username ?? user.username;
@@ -81,6 +82,30 @@ router.put('/profile', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Error updating profile', error });
     }
   });
+
+
+
+  // PUT /api/users/profile/picture - Update user profile picture
+router.put('/profile/picture', authMiddleware, upload.single('profilePicture'), async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    
+    if (req.file) {
+      // Save the file path in the database
+      user.profilePicture = `/uploads/${req.file.filename}`;
+      await user.save();
+      return res.status(200).json({ message: 'Profile picture updated successfully', profilePicture: user.profilePicture });
+    } else {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+  } catch (error) {
+    console.log(error);
+    
+    res.status(500).json({ message: 'Error updating profile picture', error });
+  }
+});
   
 
   // GET /api/users/orders - Get order history for a user (authentication required)
