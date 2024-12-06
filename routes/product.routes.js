@@ -66,14 +66,32 @@ router.get('/allProducts', async (req, res) => {
 
 // GET /api/products/:productId - Get details of a specific product
 router.get('/:productId', async (req, res) => {
-    try {
-      const product = await Product.findById(req.params.productId);
-      if (!product) return res.status(404).json({ message: 'Product not found' });
-      res.status(200).json(product);
-    } catch (error) {
-      res.status(500).json({ message: 'Error fetching product details', error });
+  try {
+    // Fetch the product by ID
+    const product = await Product.findById(req.params.productId);
+
+    // Check if the product exists
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
     }
-  });
+
+    // Add imagePath dynamically
+    const updatedProduct = {
+      ...product.toObject(),
+      imagePath: product.images?.map((image) => `http://localhost:3000/${image}`), // Returns an array of image URLs
+    };
+
+    // Send the response
+    res.status(200).json({
+      message: 'Product found',
+      product: updatedProduct,
+    });
+  } catch (error) {
+    console.error('Error fetching product details:', error);
+    res.status(500).json({ message: 'Error fetching product details', error });
+  }
+});
+
 
 
  // POST /api/products/addProduct - Add a new product (admin only)

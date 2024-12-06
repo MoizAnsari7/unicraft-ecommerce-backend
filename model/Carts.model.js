@@ -8,8 +8,7 @@ const CartSchema = new mongoose.Schema({
     {
       productId: { type: ObjectId, ref: 'Product', required: true }, // Reference to Product ID
       quantity: { type: Number, required: true },
-      savedForLater: { type: Boolean, default: false },
-      price : {type : Number, required : true, default : 0} // Flag for "saved for later"
+      savedForLater: { type: Boolean, default: false } // Flag for "saved for later"
     }
   ],
   total: { type: Number, required: true, default: 0 },
