@@ -13,7 +13,7 @@ const UserSchema = new mongoose.Schema({
   },
   addresses: [ 
     {
-      _id: mongoose.Schema.Types.ObjectId,
+      _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
       street: String,
       city: String,
       state: String,

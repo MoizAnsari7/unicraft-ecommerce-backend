@@ -120,14 +120,27 @@ router.get('/orders', authMiddleware, async (req, res) => {
   });
 
 
+  //User Address
+
+  // POST /api/users/address - Add new address
+router.get('/address', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.status(201).json({ message: 'User Address Fetching...', address: user.addresses });
+  } catch (error) {
+    res.status(500).json({ message: 'Error finding address', error });
+  }
+});
+
   // POST /api/users/address - Add new address
 router.post('/address', authMiddleware, async (req, res) => {
-    const { street, city, state, country, postalCode } = req.body;
+    const { street, city, state, country, zip, phone } = req.body;
     try {
-      const user = await User.findById(req.user._id);
+      const user = await User.findById(req.userId);
       if (!user) return res.status(404).json({ message: 'User not found' });
   
-      user.addresses.push({ street, city, state, country, postalCode });
+      user.addresses.push({ street, city, state, country, zip, phone });
       await user.save();
   
       res.status(201).json({ message: 'Address added successfully', addresses: user.addresses });
@@ -139,9 +152,9 @@ router.post('/address', authMiddleware, async (req, res) => {
 
   // PUT /api/users/address/:addressId - Update an address
 router.put('/address/:addressId', authMiddleware, async (req, res) => {
-    const { street, city, state, country, postalCode } = req.body;
+    const { street, city, state, country, zip, phone } = req.body;
     try {
-      const user = await User.findById(req.user._id);
+      const user = await User.findById(req.userId);
       if (!user) return res.status(404).json({ message: 'User not found' });
   
       const address = user.addresses.id(req.params.addressId);
@@ -151,7 +164,9 @@ router.put('/address/:addressId', authMiddleware, async (req, res) => {
       address.city = city ?? address.city;
       address.state = state ?? address.state;
       address.country = country ?? address.country;
-      address.postalCode = postalCode ?? address.postalCode;  
+      address.zip = zip ?? address.zip;  
+      address.phone = phone ?? address.phone;  
+    
   
       await user.save();
       res.status(200).json({ message: 'Address updated successfully', address });
@@ -161,19 +176,27 @@ router.put('/address/:addressId', authMiddleware, async (req, res) => {
   });
 
 
-  // DELETE /api/users/address/:addressId - Delete an address
+ // DELETE /api/users/address/:addressId - Delete an address
 router.delete('/address/:addressId', authMiddleware, async (req, res) => {
-    try {
-      const user = await User.findById(req.user._id);
-      if (!user) return res.status(404).json({ message: 'User not found' });
-  
-      user.addresses.id(req.params.addressId).remove();
-      await user.save();
-      
-      res.status(200).json({ message: 'Address deleted successfully' });
-    } catch (error) {
-      res.status(500).json({ message: 'Error deleting address', error });
-    }
-  });
+  try {
+    const user = await User.findById(req.userId); // Ensure req.userId is correctly populated
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Find the index of the address in the array
+    const addressIndex = user.addresses.findIndex(address => address._id.toString() === req.params.addressId);
+    if (addressIndex === -1) return res.status(404).json({ message: 'Address not found' });
+
+    // Remove the address from the array
+    user.addresses.splice(addressIndex, 1);
+    await user.save(); // Save the updated user document
+
+    res.status(200).json({ message: 'Address deleted successfully', addresses: user.addresses });
+  } catch (error) {
+    console.error('Error deleting address:', error);
+    res.status(500).json({ message: 'Error deleting address', error });
+  }
+});
+
+
   
   module.exports = router;
