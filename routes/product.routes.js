@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
 // GET /api/allProducts/ - Get All products
 router.get('/allProducts', async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find().populate('category');
     
     if (!products || products.length === 0) {
       return res.status(404).json({ message: 'No products found' });

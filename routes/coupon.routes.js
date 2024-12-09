@@ -3,6 +3,16 @@ const Coupon = require('../model/Coupon.model');
 const authMiddleware = require('../middlewares/authMiddleware');
 const router = express.Router();
 
+
+//GET Coupon API
+router.get('/', authMiddleware, async(req,res)=>{
+  const coupon =await Coupon.find();
+  if(coupon.length > 0){
+    return res.status(200).json({message : "Coupon found", coupon})
+  }
+})
+
+
 // POST /api/coupons - Create a coupon (admin only)
 router.post('/coupons', authMiddleware, async (req, res) => {
   if (req.userRole !== 'admin') {
@@ -16,9 +26,17 @@ router.post('/coupons', authMiddleware, async (req, res) => {
       expirationDate,
       isActive,
     });
+
+    // Check if the coupon already exists
+    const couponExists = await Coupon.findOne({ code: code }); // Use `await` and `findOne`
+    if (couponExists) {
+      return res.status(400).json({ message: 'Coupon already exists' });
+    } 
     await coupon.save();
     res.status(201).json({ message: 'Coupon created successfully', coupon });
   } catch (error) {
+    console.log(error);
+    
     res.status(500).json({ message: 'Error creating coupon', error });
   }
 });
@@ -28,11 +46,11 @@ router.put('/coupons/:couponId', authMiddleware, async (req, res) => {
   if (req.userRole !== 'admin') {
     return res.status(403).json({ message: 'Access denied' });
   }
-  const { discountAmount, expirationDate, isActive } = req.body;
+  const {code, discountAmount, expirationDate, isActive } = req.body;
   try {
     const coupon = await Coupon.findByIdAndUpdate(
       req.params.couponId,
-      { discountAmount, expirationDate, isActive },
+      { code,discountAmount, expirationDate, isActive },
       { new: true }
     );
     if (!coupon) return res.status(404).json({ message: 'Coupon not found' });
@@ -56,20 +74,56 @@ router.delete('/coupons/:couponId', authMiddleware, async (req, res) => {
   }
 });
 
-// POST /api/coupons/apply - Apply a coupon code at checkout
-router.post('/coupons/apply', async (req, res) => {
+
+
+router.post('/apply', authMiddleware, async (req, res) => {
   const { code, totalAmount } = req.body;
+
   try {
-    const coupon = await Coupon.findOne({ code, isActive: true, expirationDate: { $gte: Date.now() } });
-    if (!coupon) return res.status(404).json({ message: 'Invalid or expired coupon code' });
+    // Validate input
+    if (!code || !totalAmount || totalAmount <= 0) {
+      return res.status(400).json({ message: 'Invalid request data' });
+    }
 
-    const discount = (totalAmount * coupon.discountAmount) / 100;
-    const discountedTotal = totalAmount - discount;
+    // Find the coupon
+    const coupon = await Coupon.findOne({
+      code,
+      isActive: true,
+      expirationDate: { $gte: new Date() }, // Ensure the coupon is not expired
+    });
 
-    res.status(200).json({ message: 'Coupon applied successfully', discountedTotal });
+    if (!coupon) {
+      return res.status(404).json({ message: 'Invalid or expired coupon code' });
+    }
+
+    // Check if the coupon has already been used by the user
+    if (coupon.usedBy.includes(req.userId)) {
+      return res.status(400).json({ message: 'Coupon has already been applied' });
+    }
+
+    // Calculate the discount (fixed discount amount)
+    const discount = coupon.discountAmount;
+
+    // Ensure discounted total is not negative
+    const discountedTotal = Math.max(totalAmount - discount, 0);
+
+    // Mark the coupon as used by the current user
+    coupon.usedBy.push(req.userId);
+    await coupon.save();
+
+    res.status(200).json({
+      message: 'Coupon applied successfully',
+      discount,
+      discountedTotal,
+    });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Error applying coupon', error });
   }
 });
+
+
+
+
 
 module.exports = router;
