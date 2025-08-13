@@ -2,10 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 
 const Brands = require('../model/Brands.model');
-const authMiddleware = require('../middlewares/authMiddleware');  // Middleware to check user roles
-
-const Brands = require('../models/Brands');
-const authMiddleware = require('../middleware/auth');  // Middleware to check user roles
+const { authMiddleware, adminAuth } = require('../middlewares/authMiddleware');
+ // Middleware to check user roles
 
 const router = express.Router();
 

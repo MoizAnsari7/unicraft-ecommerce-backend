@@ -1,8 +1,6 @@
 const express = require('express');
 const Payment = require('../model/Payments.model');
-const authMiddleware = require('../middlewares/authMiddleware');
-const Payment = require('../models/Payment');
-const authMiddleware = require('../middleware/auth');
+const {authMiddleware} = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 // POST /api/payments/create - Initiate a payment session (integrates with payment gateway)

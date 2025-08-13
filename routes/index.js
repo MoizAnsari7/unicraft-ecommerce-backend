@@ -41,8 +41,3 @@ router.use("/search", searchRoutes);
 router.use("/users", userRoutes);
 
 module.exports = router;
-const CategoryRoutes = require("./category.routes");
-
-router.use("/category", CategoryRoutes);
-
-module.exports = router;

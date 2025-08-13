@@ -1,8 +1,6 @@
 const express = require('express');
 const DeliveryCoordinator = require('../model/DeliveryCoordinator.model');
-const authMiddleware = require('../middlewares/authMiddleware');
-const DeliveryCoordinator = require('../models/DeliveryCoordinator');
-const authMiddleware = require('../middleware/auth');
+const {authMiddleware} = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 // Create a new delivery coordinator

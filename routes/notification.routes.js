@@ -1,8 +1,6 @@
 const express = require('express');
 const Notification = require('../model/Notifications.model');
-const authMiddleware = require('../middlewares/authMiddleware');
-const Notification = require('../models/Notification');
-const authMiddleware = require('../middleware/auth');
+const {authMiddleware} = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 // POST /api/notifications - Create a new notification (admin only)
